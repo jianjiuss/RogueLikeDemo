@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class MapManager : MonoBehaviour {
 
+    public static MapManager _Instance;
+
     public GameObject[] outWalls;
     public GameObject[] floors;
     public GameObject[] walls;
@@ -21,11 +23,12 @@ public class MapManager : MonoBehaviour {
     private List<Vector3> positionList;
 
     private GameManager gameManager;
+    public List<Vector2> units = new List<Vector2>();
 
     void Awake()
     {
         gameManager = GetComponent<GameManager>();
-        InitMap();
+        _Instance = this;
     }
 	
 	void Update () 
@@ -33,8 +36,9 @@ public class MapManager : MonoBehaviour {
 		
 	}
 
-    private void InitMap()
+    public void InitMap()
     {
+
         mapContainer = new GameObject("Map").transform;
         //背景地图生成
         for(int y = 0; y < row; y++)
@@ -70,11 +74,20 @@ public class MapManager : MonoBehaviour {
 
         //食物生成
         //食物数量 2 - level * 2
-        int foodCount = Random.Range(2, gameManager.level * 2 + 1);
+        int foodMax = gameManager.level * 2 + 1;
+        if(foodMax > 8)
+        {
+            foodMax = 8;
+        }
+        int foodCount = Random.Range(2, foodMax);
         CreateItems(foodCount, foods);
 
         //敌人生成
         int enemyCount = gameManager.level / 2;
+        if(enemyCount > 12)
+        {
+            enemyCount = 12;
+        }
         CreateItems(enemyCount, enemys);
 
         //生成出口
@@ -83,6 +96,10 @@ public class MapManager : MonoBehaviour {
 
     private void CreateItems(int count, GameObject[] prefabs)
     {
+        if(positionList.Count == 0)
+        {
+            return;
+        }
         for (int i = 0; i < count; i++)
         {
             Vector2 pos = RandomPosition();
@@ -93,11 +110,21 @@ public class MapManager : MonoBehaviour {
 
     private Vector2 RandomPosition()
     {
-        int positionIndex = Random.Range(0, positionList.Count);
-        Vector2 pos = positionList[positionIndex];
-        positionList.RemoveAt(positionIndex);
+        int positionIndex = 0;
+        try
+        {
+            positionIndex = Random.Range(0, positionList.Count);
+            Vector2 pos = positionList[positionIndex];
+            positionList.RemoveAt(positionIndex);
 
-        return pos;
+            return pos;
+        }
+        catch
+        {
+            Debug.Log(positionList.Count);
+            Debug.Log(positionIndex);
+            throw;
+        }
     }
 
     private GameObject RandomPrefab(GameObject[] prefabs)
