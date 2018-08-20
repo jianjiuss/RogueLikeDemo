@@ -38,7 +38,7 @@ public class MapManager : MonoBehaviour {
 
     public void InitMap()
     {
-
+        units.Clear();
         mapContainer = new GameObject("Map").transform;
         //背景地图生成
         for(int y = 0; y < row; y++)
